@@ -11,11 +11,18 @@
           : 'bg-surface-white border border-outline-gray-2 text-ink-gray-9'
       "
     >
-      <div
-        v-if="role === 'ai'"
-        class="prose-chatbot"
-        v-html="renderedHtml"
-      />
+      <template v-if="role === 'ai'">
+        <div v-if="!content && isLoading" class="flex items-center gap-1.5 py-1">
+          <span class="size-2 rounded-full bg-ink-gray-4 animate-bounce" style="animation-delay: 0ms" />
+          <span class="size-2 rounded-full bg-ink-gray-4 animate-bounce" style="animation-delay: 150ms" />
+          <span class="size-2 rounded-full bg-ink-gray-4 animate-bounce" style="animation-delay: 300ms" />
+        </div>
+        <div
+          v-else
+          class="prose-chatbot"
+          v-html="renderedHtml"
+        />
+      </template>
       <div v-else class="whitespace-pre-wrap">{{ content }}</div>
     </div>
   </div>
@@ -29,6 +36,7 @@ import { computed, watch, nextTick } from "vue";
 const props = defineProps<{
   role: "human" | "ai";
   content: string;
+  isLoading?: boolean;
 }>();
 
 const renderedHtml = computed(() =>
