@@ -5,6 +5,7 @@ import LucideLayoutDashboard from "~icons/lucide/layout-dashboard";
 import { OrganizationsIcon } from "../icons";
 import PhoneIcon from "../icons/PhoneIcon.vue";
 import LucideHome from "~icons/lucide/home";
+import LucideMessageSquare from "~icons/lucide/message-square";
 import { __ } from "@/translation";
 
 export const agentPortalSidebarOptions = [
@@ -43,6 +44,11 @@ export const agentPortalSidebarOptions = [
     icon: PhoneIcon,
     to: "CallLogs",
   },
+  {
+    label: __("Chatbot"),
+    icon: LucideMessageSquare,
+    to: "ChatbotAgent",
+  },
 ];
 
 export const customerPortalSidebarOptions = [
@@ -55,5 +61,10 @@ export const customerPortalSidebarOptions = [
     label: __("Knowledge Base"),
     icon: LucideBookOpen,
     to: "CustomerKnowledgeBase",
+  },
+  {
+    label: __("Chatbot"),
+    icon: LucideMessageSquare,
+    to: "ChatbotCustomer",
   },
 ];
