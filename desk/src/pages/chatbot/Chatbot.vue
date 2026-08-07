@@ -1,53 +1,55 @@
 <template>
-  <div class="flex h-full">
-    <ThreadList
-      :threads="threads"
-      :active-thread-id="activeThreadId"
-      @select="onSelectThread"
-      @new-chat="onNewChat"
-    />
-    <div class="flex flex-1 flex-col min-w-0">
-      <div class="flex items-center justify-between border-b border-outline-gray-2 px-4 py-3 bg-surface-white">
-        <div class="text-lg-medium text-ink-gray-9">
-          {{ __("Chatbot") }}
-        </div>
+  <div class="flex h-full flex-col">
+    <div class="flex items-center justify-between border-b border-outline-gray-2 px-4 py-3 bg-surface-white shrink-0">
+      <div class="text-lg-medium text-ink-gray-9">
+        {{ __("Chatbot") }}
       </div>
+    </div>
 
-      <div
-        v-if="!chatbotApiUrl"
-        class="flex flex-1 items-center justify-center p-4"
-      >
-        <div class="text-sm text-ink-gray-6 text-center max-w-sm">
-          {{ __("Chatbot API URL belum dikonfigurasi. Hubungi admin untuk mengatur di HD Settings.") }}
-        </div>
-      </div>
-
-      <template v-else>
+    <div class="flex flex-1 min-h-0">
+      <ThreadList
+        :threads="threads"
+        :active-thread-id="activeThreadId"
+        @select="onSelectThread"
+        @new-chat="onNewChat"
+      />
+      <div class="flex flex-1 flex-col min-w-0">
         <div
-          id="chatbot-messages"
-          class="flex-1 overflow-y-scroll p-4 flex flex-col gap-3 bg-surface-gray-1"
+          v-if="!chatbotApiUrl"
+          class="flex flex-1 items-center justify-center p-4"
         >
-          <div
-            v-if="!messages.length"
-            class="flex flex-1 items-center justify-center"
-          >
-            <div class="text-sm text-ink-gray-5">
-              {{ __("Mulai percakapan baru dengan mengirim pesan.") }}
-            </div>
+          <div class="text-sm text-ink-gray-6 text-center max-w-sm">
+            {{ __("Chatbot API URL belum dikonfigurasi. Hubungi admin untuk mengatur di HD Settings.") }}
           </div>
-          <ChatMessage
-            v-for="msg in messages"
-            :key="msg.id"
-            :role="msg.role"
-            :content="msg.content"
-          />
         </div>
-        <ChatInput
-          :is-streaming="isStreaming"
-          @send="onSend"
-          @stop="onStop"
-        />
-      </template>
+
+        <template v-else>
+          <div
+            id="chatbot-messages"
+            class="flex-1 overflow-y-scroll p-4 flex flex-col gap-3 bg-surface-gray-1"
+          >
+            <div
+              v-if="!messages.length"
+              class="flex flex-1 items-center justify-center"
+            >
+              <div class="text-sm text-ink-gray-5">
+                {{ __("Mulai percakapan baru dengan mengirim pesan.") }}
+              </div>
+            </div>
+            <ChatMessage
+              v-for="msg in messages"
+              :key="msg.id"
+              :role="msg.role"
+              :content="msg.content"
+            />
+          </div>
+          <ChatInput
+            :is-streaming="isStreaming"
+            @send="onSend"
+            @stop="onStop"
+          />
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -140,8 +142,8 @@ async function onSend(input: string) {
     messages.value = [];
   }
   messages.value.push({ id: crypto.randomUUID(), role: "human", content: input });
-  const aiMsg = { id: crypto.randomUUID(), role: "ai" as const, content: "" };
-  messages.value.push(aiMsg);
+  const aiIndex = messages.value.length;
+  messages.value.push({ id: crypto.randomUUID(), role: "ai" as const, content: "" });
   isStreaming.value = true;
   abortController = new AbortController();
   try {
@@ -149,7 +151,7 @@ async function onSend(input: string) {
       `${chatbotApiUrl.value}/api/chatbot/stream`,
       { input, thread_id: threadId },
       (token) => {
-        aiMsg.content += token;
+        messages.value[aiIndex].content += token;
       },
       () => {
         isStreaming.value = false;
@@ -161,7 +163,7 @@ async function onSend(input: string) {
     isStreaming.value = false;
     abortController = null;
     if ((e as Error).name === "AbortError") return;
-    if (!aiMsg.content) messages.value.pop();
+    if (!messages.value[aiIndex]?.content) messages.value.pop();
     const msg = (e as Error)?.message || "";
     if (msg.includes("Failed to fetch")) {
       toast.error(__("CORS ditolak, periksa konfigurasi server"));
