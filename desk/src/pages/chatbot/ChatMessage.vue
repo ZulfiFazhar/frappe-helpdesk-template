@@ -12,10 +12,9 @@
       "
     >
       <template v-if="role === 'ai'">
-        <div v-if="!content && isLoading" class="flex items-center gap-1.5 py-1">
-          <span class="size-2 rounded-full bg-ink-gray-4 animate-bounce" style="animation-delay: 0ms" />
-          <span class="size-2 rounded-full bg-ink-gray-4 animate-bounce" style="animation-delay: 150ms" />
-          <span class="size-2 rounded-full bg-ink-gray-4 animate-bounce" style="animation-delay: 300ms" />
+        <div v-if="!content && isLoading" class="flex items-center gap-2 py-1">
+          <span class="size-4 border-2 border-ink-black border-t-transparent rounded-full animate-spin" />
+          <span class="text-sm text-ink-black animate-pulse">Thinking...</span>
         </div>
         <div
           v-else
@@ -40,7 +39,7 @@ const props = defineProps<{
 }>();
 
 const renderedHtml = computed(() =>
-  DOMPurify.sanitize(marked.parse(props.content, { gfm: true, breaks: true }) as string),
+  DOMPurify.sanitize(marked.parse(props.content, { gfm: true, breaks: true, async: false }) as string),
 );
 
 watch(
