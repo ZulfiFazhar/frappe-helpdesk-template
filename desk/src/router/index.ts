@@ -131,6 +131,11 @@ const portalRoutes = [
     name: "CallLogs",
     component: () => import("@/pages/call-logs/CallLogs.vue"),
   },
+  {
+    path: "/chatbot",
+    name: "ChatbotAgent",
+    component: () => import("@/pages/chatbot/Chatbot.vue"),
+  },
 
   // Customer Portal Routes
   {
@@ -188,6 +193,15 @@ const portalRoutes = [
     name: "ArticlePublic",
     component: () => import("@/pages/knowledge-base/Article.vue"),
     props: true,
+    meta: {
+      public: true,
+      auth: true,
+    },
+  },
+  {
+    path: "/my-chatbot",
+    name: "ChatbotCustomer",
+    component: () => import("@/pages/chatbot/Chatbot.vue"),
     meta: {
       public: true,
       auth: true,
