@@ -9,7 +9,6 @@
         rows="1"
         class="flex-1 resize-none rounded-lg border border-outline-gray-2 bg-surface-gray-1 px-3 py-2 text-base text-ink-gray-9 placeholder-ink-gray-4 focus:border-outline-gray-4 focus:outline-none focus:ring-0 max-h-40"
         @keydown.enter.exact.prevent="onSend"
-        @keydown.shift.enter="onShiftEnter"
         @input="autoGrow"
       />
       <Button
@@ -62,9 +61,6 @@ function onSend() {
   nextTick(() => {
     if (textareaRef.value) textareaRef.value.style.height = "auto";
   });
-}
-
-function onShiftEnter() {
 }
 
 function autoGrow() {

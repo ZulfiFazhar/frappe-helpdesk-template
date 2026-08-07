@@ -36,8 +36,8 @@
             </div>
           </div>
           <ChatMessage
-            v-for="(msg, i) in messages"
-            :key="i"
+            v-for="msg in messages"
+            :key="msg.id"
             :role="msg.role"
             :content="msg.content"
           />
@@ -56,13 +56,14 @@
 import { useChatStream } from "@/composables/useChatStream";
 import { useConfigStore } from "@/stores/config";
 import { toast } from "frappe-ui";
-import { computed, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { __ } from "@/translation";
 import ChatInput from "./ChatInput.vue";
 import ChatMessage from "./ChatMessage.vue";
 import ThreadList from "./ThreadList.vue";
 
 interface Message {
+  id: string;
   role: "human" | "ai";
   content: string;
 }
@@ -77,6 +78,10 @@ const messages = ref<Message[]>([]);
 const isStreaming = ref(false);
 let abortController: AbortController | null = null;
 
+onBeforeUnmount(() => {
+  if (abortController) abortController.abort();
+});
+
 async function fetchThreads() {
   try {
     const res = await fetch(`${chatbotApiUrl.value}/api/chatbot/threads`);
@@ -85,8 +90,13 @@ async function fetchThreads() {
     threads.value = (json.data?.thread_ids || []).map(
       (id: string) => ({ thread_id: id }),
     );
-  } catch {
-    toast.error(__("Gagal memuat daftar percakapan"));
+  } catch (e) {
+    const msg = (e as Error)?.message || "";
+    if (msg.includes("Failed to fetch")) {
+      toast.error(__("CORS ditolak, periksa konfigurasi server"));
+    } else {
+      toast.error(__("Gagal memuat daftar percakapan"));
+    }
   }
 }
 
@@ -101,12 +111,18 @@ async function onSelectThread(threadId: string) {
     const json = await res.json();
     messages.value = (json.data?.messages || []).map(
       (m: { role: string; content: string }) => ({
+        id: crypto.randomUUID(),
         role: m.role === "human" ? "human" : "ai",
         content: m.content,
       }),
     );
-  } catch {
-    toast.error(__("Gagal memuat riwayat percakapan"));
+  } catch (e) {
+    const msg = (e as Error)?.message || "";
+    if (msg.includes("Failed to fetch")) {
+      toast.error(__("CORS ditolak, periksa konfigurasi server"));
+    } else {
+      toast.error(__("Gagal memuat riwayat percakapan"));
+    }
   }
 }
 
@@ -123,8 +139,8 @@ async function onSend(input: string) {
     threads.value.unshift({ thread_id: threadId });
     messages.value = [];
   }
-  messages.value.push({ role: "human", content: input });
-  const aiMsg = { role: "ai" as const, content: "" };
+  messages.value.push({ id: crypto.randomUUID(), role: "human", content: input });
+  const aiMsg = { id: crypto.randomUUID(), role: "ai" as const, content: "" };
   messages.value.push(aiMsg);
   isStreaming.value = true;
   abortController = new AbortController();
@@ -146,7 +162,12 @@ async function onSend(input: string) {
     abortController = null;
     if ((e as Error).name === "AbortError") return;
     if (!aiMsg.content) messages.value.pop();
-    toast.error(__("Gagal terhubung ke chatbot API"));
+    const msg = (e as Error)?.message || "";
+    if (msg.includes("Failed to fetch")) {
+      toast.error(__("CORS ditolak, periksa konfigurasi server"));
+    } else {
+      toast.error(__("Gagal terhubung ke chatbot API"));
+    }
   }
 }
 

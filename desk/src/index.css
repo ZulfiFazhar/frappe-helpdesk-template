@@ -12,6 +12,12 @@
   .prose-f * {
     unicode-bidi: plaintext;
   }
+  .prose-chatbot {
+    @apply break-normal max-w-none prose prose-sm prose-code:break-all prose-code:whitespace-pre-wrap;
+  }
+  .prose-chatbot * {
+    unicode-bidi: plaintext;
+  }
   .prose-f:not(.not-prose):not(.not-prose *) pre {
     background-color: var(--surface-gray-2);
     color: var(--ink-gray-9);

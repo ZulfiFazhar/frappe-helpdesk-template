@@ -26,7 +26,7 @@
           @click="$emit('select', thread.thread_id)"
         >
           <LucideMessageSquare class="size-4 shrink-0 text-ink-gray-5" />
-          <span class="truncate">{{ thread.thread_id }}</span>
+          <span class="truncate">{{ thread.thread_id.slice(0, 8) }}</span>
         </button>
       </div>
     </ScrollArea>

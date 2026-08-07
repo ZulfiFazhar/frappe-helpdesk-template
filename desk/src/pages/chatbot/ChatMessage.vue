@@ -31,10 +31,8 @@ const props = defineProps<{
   content: string;
 }>();
 
-marked.setOptions({ gfm: true, breaks: true });
-
 const renderedHtml = computed(() =>
-  DOMPurify.sanitize(marked.parse(props.content) as string),
+  DOMPurify.sanitize(marked.parse(props.content, { gfm: true, breaks: true }) as string),
 );
 
 watch(

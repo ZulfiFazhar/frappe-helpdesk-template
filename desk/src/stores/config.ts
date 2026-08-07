@@ -39,8 +39,8 @@ export const useConfigStore = defineStore("config", () => {
   const showCustomerPortalPermissionNotice = computed(
     () => !!parseInt(config.value.show_customer_portal_permission_notice)
   );
-  const chatbotApiUrl = computed(
-    () => config.value.chatbot_api_url || ""
+  const chatbotApiUrl: ComputedRef<string> = computed(
+    () => (config.value.chatbot_api_url as string) || ""
   );
 
   $socket.on("helpdesk:settings-updated", () => configResource.reload());
