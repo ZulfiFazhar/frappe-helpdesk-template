@@ -16,6 +16,7 @@ def get_config():
         "disable_saved_replies_global_scope",
         "enable_comment_reactions",
         "show_customer_portal_permission_notice",
+        "chatbot_api_url",
     ]
     res = frappe.get_value(doctype="HD Settings", fieldname=fields, as_dict=True)
 
