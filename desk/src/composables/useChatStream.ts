@@ -35,7 +35,11 @@ export function useChatStream() {
           onDone();
           return;
         }
-        onToken(data);
+        try {
+          onToken(JSON.parse(data));
+        } catch {
+          onToken(data);
+        }
       }
     }
     onDone();
