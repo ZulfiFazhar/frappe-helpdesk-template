@@ -13,8 +13,8 @@
     >
       <template v-if="role === 'ai'">
         <div v-if="!content && isLoading" class="flex items-center gap-2 py-1">
-          <span class="size-4 border-2 border-ink-black border-t-transparent rounded-full animate-spin" />
-          <span class="text-sm text-ink-black animate-pulse">Thinking...</span>
+          <span class="size-4 border-2 rounded-full animate-spin" style="border-color: #000; border-top-color: transparent;" />
+          <span class="text-sm font-bold text-ink-gray-9 animate-pulse">Thinking...</span>
         </div>
         <div
           v-else
@@ -30,7 +30,7 @@
 <script setup lang="ts">
 import DOMPurify from "dompurify";
 import { marked } from "marked";
-import { computed, watch, nextTick } from "vue";
+import { ref, watch, nextTick } from "vue";
 
 const props = defineProps<{
   role: "human" | "ai";
@@ -38,14 +38,20 @@ const props = defineProps<{
   isLoading?: boolean;
 }>();
 
-const renderedHtml = computed(() =>
-  DOMPurify.sanitize(marked.parse(props.content, { gfm: true, breaks: true, async: false }) as string),
-);
+const renderedHtml = ref("");
 
-watch(
-  () => props.content,
-  () => nextTick(scrollParentToBottom),
-);
+function updateHtml() {
+  if (props.role !== "ai" || !props.content) {
+    renderedHtml.value = "";
+    return;
+  }
+  renderedHtml.value = DOMPurify.sanitize(
+    marked.parse(props.content, { gfm: true, breaks: true, async: false }) as string,
+  );
+  nextTick(scrollParentToBottom);
+}
+
+watch(() => props.content, updateHtml, { immediate: true });
 
 function scrollParentToBottom() {
   const el = document.getElementById("chatbot-messages");
