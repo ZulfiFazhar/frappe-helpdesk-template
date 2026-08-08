@@ -2,7 +2,7 @@
   <div class="flex h-full flex-col">
     <div class="flex items-center justify-between border-b border-outline-gray-2 px-4 py-3 bg-surface-white shrink-0">
       <div class="text-lg-medium text-ink-gray-9">
-        {{ __("Chatbot") }} v2
+        {{ __("Chatbot") }} v3
       </div>
     </div>
 
