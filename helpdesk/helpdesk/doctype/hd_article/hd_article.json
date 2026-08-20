@@ -6,18 +6,21 @@
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
- "field_order": [
-  "title",
-  "status",
-  "published_on",
-  "views",
-  "column_break_7",
-  "category",
-  "author",
-  "title_slug",
-  "content_section",
-  "content"
- ],
+  "field_order": [
+   "title",
+   "status",
+   "published_on",
+   "views",
+   "column_break_7",
+   "category",
+   "author",
+   "title_slug",
+   "content_section",
+   "content",
+   "rag_section",
+   "rag_doc_id",
+   "minio_object_key"
+  ],
  "fields": [
   {
    "allow_in_quick_entry": 1,
@@ -85,6 +88,26 @@
    "fieldname": "views",
    "fieldtype": "Int",
    "label": "Views",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rag_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "RAG Integration"
+  },
+  {
+   "fieldname": "rag_doc_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "RAG Document ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "minio_object_key",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "MinIO Object Key",
    "read_only": 1
   }
  ],

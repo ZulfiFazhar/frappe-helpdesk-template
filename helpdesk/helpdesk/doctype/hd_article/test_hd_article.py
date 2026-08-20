@@ -89,3 +89,39 @@ class TestHDArticleFeedback(IntegrationTestCase):
             },
         )
         self.assertEqual(total, 1)
+
+
+class TestHDArticleRagFields(IntegrationTestCase):
+    def setUp(self):
+        self.article = frappe.get_doc(
+            {
+                "doctype": "HD Article",
+                "title": "RAG Test Article",
+                "status": "Draft",
+                "content": "<p>Test content from RAG upload</p>",
+                "rag_doc_id": "test-doc-abc",
+                "minio_object_key": "uuid-test-file.pdf",
+            }
+        ).insert()
+
+    def tearDown(self):
+        frappe.delete_doc("HD Article", self.article.name, force=True)
+
+    def test_rag_doc_id_persists(self):
+        doc = frappe.get_doc("HD Article", self.article.name)
+        self.assertEqual(doc.rag_doc_id, "test-doc-abc")
+
+    def test_minio_object_key_persists(self):
+        doc = frappe.get_doc("HD Article", self.article.name)
+        self.assertEqual(doc.minio_object_key, "uuid-test-file.pdf")
+
+    def test_find_article_by_rag_doc_id(self):
+        result = frappe.db.get_value(
+            "HD Article",
+            {"rag_doc_id": "test-doc-abc"},
+            ["name", "title", "status"],
+        )
+        self.assertIsNotNone(result)
+        name, title, status = result
+        self.assertEqual(title, "RAG Test Article")
+        self.assertEqual(status, "Draft")
