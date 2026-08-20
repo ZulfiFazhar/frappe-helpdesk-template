@@ -2,12 +2,38 @@
   <div class="flex flex-col">
     <LayoutHeader>
       <template #left-header>
-        <div class="text-lg-medium text-ink-gray-9">
-          {{ __("Knowledge Base") }}
+        <div class="flex items-center gap-4">
+          <div class="text-lg-medium text-ink-gray-9">
+            {{ __("Knowledge Base") }}
+          </div>
+          <div class="flex gap-1">
+            <button
+              class="px-3 py-1 rounded-md text-p-sm transition-colors"
+              :class="
+                activeTab === 'articles'
+                  ? 'bg-surface-gray-4 text-ink-gray-9'
+                  : 'text-ink-gray-5 hover:bg-surface-gray-2'
+              "
+              @click="activeTab = 'articles'"
+            >
+              {{ __("Articles") }}
+            </button>
+            <button
+              class="px-3 py-1 rounded-md text-p-sm transition-colors"
+              :class="
+                activeTab === 'rag'
+                  ? 'bg-surface-gray-4 text-ink-gray-9'
+                  : 'text-ink-gray-5 hover:bg-surface-gray-2'
+              "
+              @click="activeTab = 'rag'"
+            >
+              {{ __("RAG Documents") }}
+            </button>
+          </div>
         </div>
       </template>
       <template #right-header>
-        <Dropdown :options="headerOptions">
+        <Dropdown v-if="activeTab === 'articles'" :options="headerOptions">
           <Button
             :label="__('Create')"
             variant="solid"
@@ -20,25 +46,28 @@
         </Dropdown>
       </template>
     </LayoutHeader>
-    <ListViewBuilder
-      ref="listViewRef"
-      :options="options"
-      @row-click="(row) => $router.push(`kb/articles/${row}`)"
-    />
-    <CategoryModal
-      :edit="editTitle"
-      v-model="showCategoryModal"
-      v-model:title="category.title"
-      @update="handleCategoryUpdate"
-      @create="handleCategoryCreate"
-    />
-    <MoveToCategoryModal v-model="moveToModal" @move="handleMoveToCategory" />
-    <MergeCategoryModal
-      :categoryTitle="category.title"
-      :category-id="category.id"
-      v-model="mergeModal"
-      @merge="handleMergeCategory"
-    />
+    <template v-if="activeTab === 'articles'">
+      <ListViewBuilder
+        ref="listViewRef"
+        :options="options"
+        @row-click="(row) => $router.push(`kb/articles/${row}`)"
+      />
+      <CategoryModal
+        :edit="editTitle"
+        v-model="showCategoryModal"
+        v-model:title="category.title"
+        @update="handleCategoryUpdate"
+        @create="handleCategoryCreate"
+      />
+      <MoveToCategoryModal v-model="moveToModal" @move="handleMoveToCategory" />
+      <MergeCategoryModal
+        :categoryTitle="category.title"
+        :category-id="category.id"
+        v-model="mergeModal"
+        @merge="handleMergeCategory"
+      />
+    </template>
+    <RagDocuments v-if="activeTab === 'rag'" />
   </div>
 </template>
 
@@ -48,6 +77,7 @@ import ListViewBuilder from "@/components/ListViewBuilder.vue";
 import CategoryModal from "@/components/knowledge-base/CategoryModal.vue";
 import MergeCategoryModal from "@/components/knowledge-base/MergeCategoryModal.vue";
 import MoveToCategoryModal from "@/components/knowledge-base/MoveToCategoryModal.vue";
+import RagDocuments from "./RagDocuments.vue";
 import { globalStore } from "@/stores/globalStore";
 import {
   deleteArticles,
@@ -86,6 +116,7 @@ const category = reactive({
 const _title = ref("");
 const listViewRef = ref(null);
 const editTitle = ref(false);
+const activeTab = ref<"articles" | "rag">("articles");
 
 // modals state
 const showCategoryModal = ref(false);
