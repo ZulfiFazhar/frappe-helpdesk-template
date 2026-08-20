@@ -233,7 +233,7 @@ const ticketTypeList = createListResource({
 
 const pendingTicketType = ref("");
 
-watch(ticketTypeList.data, applyTicketType);
+watch(() => ticketTypeList.data, applyTicketType);
 
 function applyTicketType() {
   if (!pendingTicketType.value) return;
