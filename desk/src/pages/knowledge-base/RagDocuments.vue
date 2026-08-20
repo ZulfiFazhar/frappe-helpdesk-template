@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-3">
+  <div class="mx-auto w-full max-w-4xl px-5 py-6 flex flex-col gap-3">
     <!-- Header with upload button -->
     <div class="flex items-center justify-between">
       <div class="text-lg-medium text-ink-gray-9">
@@ -41,20 +41,19 @@
     </div>
 
     <!-- Error state -->
-    <div
+    <Alert
       v-else-if="error"
-      class="rounded-lg border border-outline-gray-2 p-6 text-center"
+      :title="__('RAG service unavailable')"
+      :description="error"
+      theme="red"
     >
-      <p class="text-p-base text-ink-gray-6">
-        {{ __("RAG service unavailable") }}
-      </p>
       <Button
         variant="subtle"
         class="mt-3"
         :label="__('Retry')"
         @click="fetchDocs"
       />
-    </div>
+    </Alert>
 
     <!-- Empty state -->
     <div
@@ -139,6 +138,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import {
+  Alert,
   Button,
   LoadingIndicator,
   createResource,
@@ -187,17 +187,17 @@ const currentUploadFilename = ref("");
 
 const ragUpload = useRagUpload();
 
-// Fetch chatbot_api_base_url from HD Settings (auto-fetches on mount)
+// Fetch chatbot_api_url from HD Settings (auto-fetches on mount)
 const settingsResource = createResource({
   url: "frappe.client.get",
   params: {
     doctype: "HD Settings",
     name: "HD Settings",
-    fields: ["chatbot_api_base_url"],
+    fields: ["chatbot_api_url"],
   },
   auto: true,
-  onSuccess(data: { chatbot_api_base_url: string }) {
-    apiBase.value = (data.chatbot_api_base_url || "").trim();
+  onSuccess(data: { chatbot_api_url: string }) {
+    apiBase.value = (data.chatbot_api_url || "").trim();
     fetchDocs();
   },
   onError() {
