@@ -201,6 +201,7 @@ const template = createResource({
       applyFilters,
     });
     setupTemplateFields(data.fields);
+    prefillFromChatbot();
   },
 });
 
@@ -208,6 +209,18 @@ function setupTemplateFields(fields) {
   fields.forEach((field: Field) => {
     templateFields[field.fieldname] = "";
   });
+}
+
+function prefillFromChatbot() {
+  const q = route.query;
+  if (q.subject) subject.value = q.subject as string;
+  if (q.priority) templateFields.priority = q.priority as string;
+  if (q.ticket_type) templateFields.ticket_type = q.ticket_type as string;
+  const desc = sessionStorage.getItem("chatbot_ticket_description");
+  if (desc) {
+    description.value = desc;
+    sessionStorage.removeItem("chatbot_ticket_description");
+  }
 }
 
 const ticketPriorityResource = createListResource({
