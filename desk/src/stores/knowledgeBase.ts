@@ -122,3 +122,57 @@ export const incrementView = createResource({
   }),
 });
 
+// RAG Integration — article creation from RAG upload + linked article lookup
+export const createArticleFromRag = createResource({
+  url: "frappe.client.insert",
+  makeParams({
+    title,
+    content,
+    category,
+    rag_doc_id,
+    minio_object_key,
+  }: {
+    title: string;
+    content: string;
+    category: string;
+    rag_doc_id: string;
+    minio_object_key: string;
+  }) {
+    return {
+      doc: {
+        doctype: "HD Article",
+        title,
+        content,
+        category,
+        status: "Draft",
+        rag_doc_id,
+        minio_object_key,
+      },
+    };
+  },
+  validate({ title }: { title: string }) {
+    if (!title) throw "Title is required";
+  },
+});
+
+export const findLinkedArticles = createResource({
+  url: "frappe.client.get_list",
+  makeParams({ rag_doc_ids }: { rag_doc_ids: string[] }) {
+    return {
+      doctype: "HD Article",
+      fields: ["name", "title", "status", "rag_doc_id"],
+      filters: { rag_doc_id: ["in", rag_doc_ids] },
+    };
+  },
+});
+
+export const deleteLinkedArticle = createResource({
+  url: "frappe.client.delete",
+  makeParams({ name }: { name: string }) {
+    return {
+      doctype: "HD Article",
+      name,
+    };
+  },
+});
+
