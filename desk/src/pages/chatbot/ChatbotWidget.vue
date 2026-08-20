@@ -49,6 +49,7 @@
           :role="msg.role"
           :content="msg.content"
           :is-loading="isStreaming && msg.role === 'ai' && !msg.content"
+          @create-ticket="onCreateTicket"
         />
       </div>
       <ChatInput
@@ -65,6 +66,9 @@ import { useChatStream } from "@/composables/useChatStream";
 import { Button, createResource, LoadingIndicator, toast } from "frappe-ui";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { __ } from "@/translation";
+import { useRouter } from "vue-router";
+import { isCustomerPortal } from "@/utils";
+import type { TicketRecommendation } from "./types";
 import ChatInput from "./ChatInput.vue";
 import ChatMessage from "./ChatMessage.vue";
 
@@ -81,6 +85,9 @@ const brandName = ref("");
 const messages = ref<Message[]>([]);
 const isStreaming = ref(false);
 let abortController: AbortController | null = null;
+
+const router = useRouter();
+let currentThreadId: string | null = null;
 
 const { stream } = useChatStream();
 
@@ -121,6 +128,7 @@ function resetThread() {
   abortController = null;
   isStreaming.value = false;
   messages.value = [];
+  currentThreadId = null;
 }
 
 async function onSend(input: string) {
@@ -130,10 +138,11 @@ async function onSend(input: string) {
   messages.value.push({ id: crypto.randomUUID(), role: "ai" as const, content: "" });
   isStreaming.value = true;
   abortController = new AbortController();
+  currentThreadId = crypto.randomUUID();
   try {
     await stream(
-      ${apiBase.value}/api/chatbot/stream,
-      { input, thread_id: crypto.randomUUID() },
+      `${apiBase.value}/api/chatbot/stream`,
+      { input, thread_id: currentThreadId },
       (token) => {
         messages.value[aiIndex].content += token;
       },
@@ -164,4 +173,40 @@ function onStop() {
   }
   isStreaming.value = false;
 }
+
+async function onCreateTicket(rec: TicketRecommendation) {
+  let historyText = "";
+  try {
+    if (currentThreadId) {
+      const res = await fetch(
+        `${apiBase.value}/api/chatbot/threads/${currentThreadId}`
+      );
+      if (res.ok) {
+        const json = await res.json();
+        historyText = (json.data?.messages || [])
+          .map((m: { role: string; content: string }) =>
+            `${m.role === "human" ? "User" : "Assistant"}: ${m.content}`)
+          .join("\n");
+      }
+    }
+  } catch {
+    toast.error(__("Gagal memuat riwayat percakapan, tiket dibuat tanpa riwayat"));
+  }
+
+  const fullDescription = historyText
+    ? `${rec.description}\n\n--- Riwayat Percakapan ---\n${historyText}`
+    : rec.description;
+
+  sessionStorage.setItem("chatbot_ticket_description", fullDescription);
+
+  router.push({
+    name: isCustomerPortal.value ? "TicketNew" : "TicketAgentNew",
+    query: {
+      subject: rec.subject,
+      priority: rec.priority,
+      ticket_type: rec.category,
+    },
+  });
+}
+
 </script>
