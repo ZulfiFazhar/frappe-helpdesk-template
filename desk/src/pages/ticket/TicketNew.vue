@@ -158,7 +158,7 @@ import {
 } from "frappe-ui";
 import { useOnboarding } from "frappe-ui/frappe";
 import sanitizeHtml from "sanitize-html";
-import { computed, defineAsyncComponent, onMounted, reactive, ref } from "vue";
+import { computed, defineAsyncComponent, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SearchArticles from "../../components/SearchArticles.vue";
 
@@ -215,12 +215,34 @@ function prefillFromChatbot() {
   const q = route.query;
   if (q.subject) subject.value = q.subject as string;
   if (q.priority) templateFields.priority = q.priority as string;
-  if (q.ticket_type) templateFields.ticket_type = q.ticket_type as string;
+  if (q.ticket_type) pendingTicketType.value = q.ticket_type as string;
   const desc = sessionStorage.getItem("chatbot_ticket_description");
   if (desc) {
     description.value = desc;
     sessionStorage.removeItem("chatbot_ticket_description");
   }
+  applyTicketType();
+}
+
+const ticketTypeList = createListResource({
+  doctype: "HD Ticket Type",
+  fields: ["name"],
+  auto: true,
+  cache: "ticketTypes",
+});
+
+const pendingTicketType = ref("");
+
+watch(ticketTypeList.data, applyTicketType);
+
+function applyTicketType() {
+  if (!pendingTicketType.value) return;
+  if (!ticketTypeList.data) return;
+  const valid = ticketTypeList.data.some(
+    (t) => t.name === pendingTicketType.value,
+  );
+  if (valid) templateFields.ticket_type = pendingTicketType.value;
+  pendingTicketType.value = "";
 }
 
 const ticketPriorityResource = createListResource({
