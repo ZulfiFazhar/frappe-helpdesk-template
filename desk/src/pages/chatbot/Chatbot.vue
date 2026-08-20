@@ -42,6 +42,7 @@
               :role="msg.role"
               :content="msg.content"
               :is-loading="isStreaming && msg.role === 'ai' && !msg.content"
+              @create-ticket="onCreateTicket"
             />
           </div>
           <ChatInput
@@ -60,6 +61,9 @@ import { useChatStream } from "@/composables/useChatStream";
 import { useConfigStore } from "@/stores/config";
 import { toast } from "frappe-ui";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { isCustomerPortal } from "@/utils";
+import type { TicketRecommendation } from "./types";
 import { __ } from "@/translation";
 import ChatInput from "./ChatInput.vue";
 import ChatMessage from "./ChatMessage.vue";
@@ -74,6 +78,7 @@ interface Message {
 const configStore = useConfigStore();
 const chatbotApiUrl = computed(() => configStore.chatbotApiUrl);
 const { stream } = useChatStream();
+const router = useRouter();
 
 const threads = ref<{ thread_id: string }[]>([]);
 const activeThreadId = ref<string | null>(null);
@@ -180,6 +185,39 @@ function onStop() {
     abortController = null;
   }
   isStreaming.value = false;
+}
+
+async function onCreateTicket(rec: TicketRecommendation) {
+  let historyText = "";
+  try {
+    const res = await fetch(
+      `${chatbotApiUrl.value}/api/chatbot/threads/${activeThreadId.value}`
+    );
+    if (res.ok) {
+      const json = await res.json();
+      historyText = (json.data?.messages || [])
+        .map((m: { role: string; content: string }) =>
+          `${m.role === "human" ? "User" : "Assistant"}: ${m.content}`)
+        .join("\n");
+    }
+  } catch {
+    toast.error(__("Gagal memuat riwayat percakapan, tiket dibuat tanpa riwayat"));
+  }
+
+  const fullDescription = historyText
+    ? `${rec.description}\n\n--- Riwayat Percakapan ---\n${historyText}`
+    : rec.description;
+
+  sessionStorage.setItem("chatbot_ticket_description", fullDescription);
+
+  router.push({
+    name: isCustomerPortal.value ? "TicketNew" : "TicketAgentNew",
+    query: {
+      subject: rec.subject,
+      priority: rec.priority,
+      ticket_type: rec.category,
+    },
+  });
 }
 
 onMounted(fetchThreads);
