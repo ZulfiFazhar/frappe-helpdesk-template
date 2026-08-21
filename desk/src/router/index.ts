@@ -225,6 +225,12 @@ const routes = [
     beforeEnter: () => canViewPersona(useAuthStore()) || { name: "Home" },
   },
   {
+    path: "/chatbot-widget",
+    name: "ChatbotWidget",
+    component: () => import("@/pages/chatbot/ChatbotWidget.vue"),
+    meta: { public: true, auth: true },
+  },
+  {
     path: "/",
     component: () => import("@/roots/PortalRoot.vue"),
     children: portalRoutes,

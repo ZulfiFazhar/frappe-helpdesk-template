@@ -85,6 +85,7 @@
   "reply_via_agent_email_content",
   "chatbot_tab",
   "chatbot_section",
+  "chatbot_enabled",
   "chatbot_api_url"
  ],
  "fields": [
@@ -533,31 +534,37 @@
    "fieldtype": "Section Break",
    "label": "Ticket Routing"
   },
-   {
-    "default": "1",
-    "description": "Automatically set the customer on a ticket based on the contact's linked customer(s)",
-    "fieldname": "auto_set_customer_from_contact",
-    "fieldtype": "Check",
-    "label": "Auto-set customer from contact"
-   },
-   {
-    "fieldname": "chatbot_tab",
-    "fieldtype": "Tab Break",
-    "label": "Chatbot"
-   },
-   {
-    "fieldname": "chatbot_section",
-    "fieldtype": "Section Break",
-    "label": "Chatbot API"
-   },
-   {
-    "default": "http://localhost:8000",
-    "description": "Base URL of helpdesk-ai-fastapi (without /api suffix), e.g. http://localhost:8000",
-    "fieldname": "chatbot_api_url",
-    "fieldtype": "Data",
-    "label": "Chatbot API URL"
-   }
-  ],
+  {
+   "default": "1",
+   "description": "Automatically set the customer on a ticket based on the contact's linked customer(s)",
+   "fieldname": "auto_set_customer_from_contact",
+   "fieldtype": "Check",
+   "label": "Auto-set customer from contact"
+  },
+  {
+   "fieldname": "chatbot_tab",
+   "fieldtype": "Tab Break",
+   "label": "Chatbot"
+  },
+  {
+   "fieldname": "chatbot_section",
+   "fieldtype": "Section Break",
+   "label": "Chatbot API"
+  },
+  {
+   "default": "0",
+   "fieldname": "chatbot_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Chatbot"
+  },
+  {
+   "default": "http://localhost:8000",
+   "description": "Base URL of helpdesk-ai-fastapi (without /api suffix), e.g. http://localhost:8000",
+   "fieldname": "chatbot_api_url",
+   "fieldtype": "Data",
+   "label": "Chatbot API URL"
+  }
+ ],
  "grid_page_length": 50,
  "issingle": 1,
  "links": [],

@@ -8,6 +8,7 @@ import FieldDependencyConfig from "./FieldDependency/FieldDependencyConfig.vue";
 import InviteAgents from "./InviteAgents.vue";
 import LucideMail from "~icons/lucide/mail";
 import LucideMailOpen from "~icons/lucide/mail-open";
+import LucideMessageCircle from "~icons/lucide/message-circle";
 import LucideUser from "~icons/lucide/user";
 import LucideUserPlus from "~icons/lucide/user-plus";
 import LucideUsers from "~icons/lucide/users";
@@ -29,6 +30,7 @@ import SavedReplies from "./SavedReplies/SavedReplies.vue";
 import { Avatar } from "frappe-ui";
 import { useAuthStore } from "@/stores/auth";
 import General from "./General/General.vue";
+import Chatbot from "./Chatbot/Chatbot.vue";
 import SettingsGear from "~icons/lucide/settings";
 import SavedReplyIcon from "../icons/SavedReplyIcon.vue";
 import ProfilePage from "./Profile/ProfilePage.vue";
@@ -133,6 +135,12 @@ export const tabs = computed(() => {
           icon: markRaw(SavedReplyIcon),
           component: markRaw(SavedReplies),
         },
+        {
+          label: __("Chatbot"),
+          icon: markRaw(LucideMessageCircle),
+          component: markRaw(Chatbot),
+          condition: () => auth.isAdmin,
+        },
       ],
     },
     {
@@ -186,7 +194,8 @@ type TabName =
   | "Field Dependencies"
   | "Telephony"
   | "ERPNext"
-  | "Saved Replies";
+  | "Saved Replies"
+  | "Chatbot";
 
 export const setActiveSettingsTab = (tabName: TabName) => {
   activeTab.value =

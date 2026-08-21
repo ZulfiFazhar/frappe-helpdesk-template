@@ -16,3 +16,12 @@ class TestHDSettings(unittest.TestCase):
         self.assertEqual(field.fieldtype, "Data")
         value = frappe.db.get_single_value("HD Settings", "chatbot_api_url")
         self.assertEqual(value, "http://localhost:8000")
+
+    def test_chatbot_enabled_field_exists_and_persists(self):
+        meta = frappe.get_meta("HD Settings")
+        field = meta.get_field("chatbot_enabled")
+        self.assertIsNotNone(field, "chatbot_enabled field missing from HD Settings")
+        self.assertEqual(field.fieldtype, "Check")
+        frappe.db.set_single_value("HD Settings", "chatbot_enabled", 1)
+        self.assertTrue(frappe.db.get_single_value("HD Settings", "chatbot_enabled"))
+        frappe.db.set_single_value("HD Settings", "chatbot_enabled", 0)
