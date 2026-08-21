@@ -289,11 +289,13 @@ async function onFileSelected(e: Event) {
   const result = await ragUpload.upload(file, apiBase.value);
 
   if (result && result.step === "complete") {
+    const rawContent = result.extracted_text || "";
+    const cleanContent = rawContent.replace(/\x00/g, "").replace(/\r/g, "");
     // Create draft HD Article
     createArticleFromRag.submit(
       {
-        title: result.filename || file.name,
-        content: result.extracted_text || "",
+        title: (result.filename || file.name).slice(0, 140),
+        content: cleanContent,
         category: "",
         rag_doc_id: result.doc_id || "",
         minio_object_key: result.minio_object_key || "",
@@ -303,12 +305,15 @@ async function onFileSelected(e: Event) {
           toast.success(__("Document uploaded and article created"));
           fetchDocs();
         },
-        onError(err: { messages?: string[]; message?: string }) {
-          toast.warning(
+        onError(err: any) {
+          console.error("createArticleFromRag error:", err);
+          const msg =
             err?.messages?.[0] ||
-              err?.message ||
-              __("RAG upload succeeded but article creation failed"),
-          );
+            err?.message ||
+            err?._server_messages?.[0] ||
+            (typeof err === "string" ? err : "") ||
+            __("RAG upload succeeded but article creation failed");
+          toast.warning(msg);
           fetchDocs();
         },
       },

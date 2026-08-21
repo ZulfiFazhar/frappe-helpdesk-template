@@ -17,7 +17,7 @@
     <!-- Progress bar -->
     <div class="w-full bg-surface-gray-2 rounded-full h-2 overflow-hidden">
       <div
-        class="h-full bg-ink-gray-8 transition-all duration-500 ease-out"
+        class="h-full bg-ink-gray-9 transition-all duration-500 ease-out"
         :class="error ? 'bg-rose-500' : ''"
         :style="{ width: `${progress}%` }"
       />
